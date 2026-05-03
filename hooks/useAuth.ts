@@ -25,6 +25,16 @@ export function useUsers(projectSlug: string) {
   });
 }
 
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: ["auth-me"],
+    queryFn: async () =>
+      readJson<{ user: { id: string; name: string; role: string; projectId: string } }>(
+        await fetch("/api/auth/me")
+      )
+  });
+}
+
 export function useLogin() {
   return useMutation({
     mutationFn: async (userId: string) =>

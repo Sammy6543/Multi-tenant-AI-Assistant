@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { useConversations, useCreateConversation } from "@/hooks/useChat";
+import { useCurrentUser } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
 
 export default function ProjectOverview({ slug }: { slug: string }) {
@@ -11,6 +12,7 @@ export default function ProjectOverview({ slug }: { slug: string }) {
   const createConversation = useCreateConversation();
   const projectId = data?.project?._id ?? "";
   const conversations = useConversations(projectId);
+  const currentUser = useCurrentUser();
 
   const openConversation = async (productInstanceId: string) => {
     if (!data?.project?._id) return;
@@ -65,9 +67,11 @@ export default function ProjectOverview({ slug }: { slug: string }) {
           ))}
         </div>
       </div>
-      <button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={() => router.push(`/admin/${data.project._id}`)}>
-        Go to Admin Dashboard
-      </button>
+      {currentUser.data?.user?.role === "admin" && (
+        <button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={() => router.push(`/admin/${data.project._id}`)}>
+          Go to Admin Dashboard
+        </button>
+      )}
     </div>
   );
 }

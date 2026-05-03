@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     console.log("Found users count:", users.length);
     return ok({ users });
   } catch (error) {
-    console.error("Error in GET /api/auth/users:", error);
-    return fail("Internal Server Error", 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error in GET /api/auth/users:", errorMessage, error);
+    return fail(`Internal Server Error: ${errorMessage}`, 500);
   }
 }

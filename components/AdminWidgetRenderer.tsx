@@ -1,6 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 import { useAdminDashboard } from "@/hooks/useAdmin";
+import { useCurrentUser } from "@/hooks/useAuth";
 
 function renderWidget(
   widget: {
@@ -46,9 +50,19 @@ function renderWidget(
 }
 
 export default function AdminWidgetRenderer({ projectId }: { projectId: string }) {
+  const router = useRouter();
   const { data, isLoading, error } = useAdminDashboard(projectId);
+  const currentUser = useCurrentUser();
 
-  if (isLoading) return <p className="p-6">Loading dashboard...</p>;
+  useEffect(() => {
+    if (currentUser.data && currentUser.data.user.role !== "admin") {
+      router.push(`/project/${currentUser.data.user.projectId}`);
+    }
+  }, [currentUser.data, router]);
+
+  if (currentUser.isLoading) return <p className="p-6">Checking permissions...</p>;
+  if (currentUser.error) return <p className="p-6 text-red-600">Failed to verify permissions</p>;
+  if (currentUser.data?.user?.role !== "admin") return <p className="p-6">Access denied. You must be an admin to view this page.</p>;
   if (error) return <p className="p-6 text-red-600">{(error as Error).message}</p>;
   if (!data?.config?.widgets?.length) return <p className="p-6">No widgets configured for this project.</p>;
 
